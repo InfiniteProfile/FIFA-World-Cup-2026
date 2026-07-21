@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>THE FINAL WHISTLE — FIFA World Cup 2026 Archive</title>
+<style>
+  :root{
+    --ink:#070a09;
+    --pitch:#0c1a16;
+    --teal:#0e3a3c;
+    --teal-bright:#1c6e6a;
+    --gold:#c9a24a;
+    --gold-bright:#e8c877;
+    --paper:#ece7db;
+    --paper-dim:#a9a596;
+    --rose:#a5495a;
+    --line: rgba(201,162,74,0.28);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--ink);color:var(--paper);
+    font-family:'Iowan Old Style','Georgia',serif; -webkit-font-smoothing:antialiased;}
+  ::selection{background:var(--gold); color:#111;}
+
+  /* ---------- Gate / start overlay (needed for audio autoplay) ---------- */
+  #gate{
+    position:fixed; inset:0; z-index:999; background:radial-gradient(ellipse at 50% 30%, #0f2422 0%, #070a09 70%);
+    display:flex; align-items:center; justify-content:center; flex-direction:column; text-align:center;
+    transition:opacity .9s ease, visibility .9s ease;
+  }
+  #gate.hidden{opacity:0; visibility:hidden; pointer-events:none;}
+  .gate-crest{
+    width:64px; height:64px; border:1px solid var(--gold); border-radius:50%;
+    display:flex; align-items:center; justify-content:center; margin-bottom:22px;
+    font-size:22px; color:var(--gold); font-family:'Times New Roman',serif;
+    box-shadow:0 0 40px rgba(201,162,74,0.15);
+  }
+  .gate-eyebrow{letter-spacing:.35em; font-size:11px; color:var(--gold-bright); text-transform:uppercase; margin-bottom:14px; font-family:'Helvetica Neue',Arial,sans-serif;}
+  .gate-title{font-size:clamp(28px,6vw,48px); color:var(--paper); margin:0 0 10px; font-weight:400; letter-spacing:.02em;}
+  .gate-sub{color:var(--paper-dim); font-size:14px; max-width:420px; line-height:1.6; margin-bottom:34px; font-family:'Helvetica Neue',Arial,sans-serif;}
+  #enterBtn{
+    background:transparent; border:1px solid var(--gold); color:var(--gold-bright);
+    padding:14px 38px; font-size:12px; letter-spacing:.28em; text-transform:uppercase;
+    cursor:pointer; font-family:'Helvetica Neue',Arial,sans-serif; transition:all .35s ease;
+  }
+  #enterBtn:hover{background:var(--gold); color:#0c1210;}
+
+  /* ---------- Nav / sound toggle ---------- */
+  #topbar{
+    position:fixed; top:0; left:0; right:0; z-index:100;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 22px; background:linear-gradient(180deg, rgba(7,10,9,0.9), rgba(7,10,9,0));
+    font-family:'Helvetica Neue',Arial,sans-serif;
+  }
+  #topbar .brand{font-size:12px; letter-spacing:.3em; color:var(--gold-bright); text-transform:uppercase;}
+  #soundBtn{
+    background:rgba(201,162,74,0.08); border:1px solid var(--line); color:var(--gold-bright);
+    width:38px; height:38px; border-radius:50%; cursor:pointer; font-size:15px;
+    display:flex; align-items:center; justify-content:center;
+  }
+
+  /* ---------- Hero ---------- */
+  .hero{
+    position:relative; min-height:78vh; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; padding:120px 20px 60px; overflow:hidden;
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(28,110,106,0.35), transparent 60%),
+      repeating-linear-gradient(90deg, rgba(201,162,74,0.035) 0 1px, transparent 1px 90px),
+      var(--ink);
+  }
+  .hero::after{
+    content:""; position:absolute; left:50%; top:64%; width:1100px; height:1100px;
+    transform:translate(-50%,-50%); border:1px solid rgba(201,162,74,0.12); border-radius:50%;
+    pointer-events:none;
+  }
+  .hero-eyebrow{letter-spacing:.4em; font-size:11px; color:var(--gold); text-transform:uppercase; font-family:'Helvetica Neue',Arial,sans-serif; margin-bottom:22px;}
+  .hero h1{
+    font-size:clamp(38px,8vw,86px); line-height:1.02; margin:0; font-weight:400;
+    background:linear-gradient(180deg,#f4ecd8,var(--gold-bright) 60%, var(--gold));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    letter-spacing:.01em;
+  }
+  .hero p.lede{max-width:560px; color:var(--paper-dim); font-size:15px; line-height:1.75; margin:26px 0 0; font-family:'Helvetica Neue',Arial,sans-serif;}
+  .hero .years{margin-top:34px; font-family:'Helvetica Neue',Arial,sans-serif; color:var(--teal-bright); letter-spacing:.25em; font-size:12px;}
+
+  /* ---------- Feed ---------- */
+  .feed{max-width:640px; margin:0 auto; padding:40px 16px 80px;}
+  .feed-heading{
+    text-align:center; font-family:'Helvetica Neue',Arial,sans-serif; letter-spacing:.3em;
+    font-size:11px; text-transform:uppercase; color:var(--paper-dim); margin-bottom:46px;
+    display:flex; align-items:center; gap:14px;
+  }
+  .feed-heading::before,.feed-heading::after{content:""; flex:1; height:1px; background:var(--line);}
+
+  .post{
+    border:1px solid var(--line); border-radius:2px; margin-bottom:34px; background:linear-gradient(180deg, rgba(255,255,255,0.015), transparent);
+    overflow:hidden; position:relative;
+  }
+  .post::before{
+    content:attr(data-index); position:absolute; top:14px; left:16px; font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:10px; letter-spacing:.2em; color:var(--gold); opacity:.65; z-index:2;
+  }
+  .post-media{position:relative; width:100%; background:#050706;}
+  .post-media img, .post-media video{width:100%; display:block; max-height:640px; object-fit:cover; cursor:zoom-in;}
+  .media-grid{display:grid; gap:2px;}
+  .media-grid.g2{grid-template-columns:1fr 1fr;}
+  .media-grid.g3{grid-template-columns:1fr 1fr 1fr;}
+  .media-grid img{cursor:zoom-in; width:100%; height:220px; object-fit:cover; display:block;}
+  .post-caption{
+    padding:20px 22px 24px; font-size:14.5px; line-height:1.85; color:var(--paper);
+    white-space:pre-wrap; font-family:'Iowan Old Style',Georgia,serif;
+  }
+  .post-caption .bracket{color:var(--gold); opacity:.55;}
+  .post-caption:empty{display:none;}
+  .post-foot{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:0 22px 18px; font-family:'Helvetica Neue',Arial,sans-serif; font-size:10.5px;
+    letter-spacing:.15em; color:var(--paper-dim); text-transform:uppercase;
+  }
+  .post-foot .crest{color:var(--teal-bright);}
+
+  .lazy-ph{
+    aspect-ratio:16/10; background:linear-gradient(120deg,#0a1210,#0f1b18,#0a1210);
+    background-size:200% 100%; animation:shimmer 1.6s ease-in-out infinite;
+  }
+  @keyframes shimmer{0%{background-position:0% 0;}100%{background-position:-200% 0;}}
+
+  /* ---------- Lightbox ---------- */
+  #lightbox{
+    position:fixed; inset:0; background:rgba(4,6,5,0.96); z-index:500;
+    display:none; align-items:center; justify-content:center; padding:24px;
+  }
+  #lightbox.open{display:flex;}
+  #lightbox img, #lightbox video{max-width:94vw; max-height:88vh; box-shadow:0 0 80px rgba(0,0,0,0.6);}
+  #lbClose{
+    position:absolute; top:20px; right:26px; color:var(--gold-bright); font-size:28px; cursor:pointer;
+    font-family:Georgia,serif; background:none; border:none;
+  }
+
+  /* ---------- Stopwatches ---------- */
+  .clocks{
+    padding:70px 20px 110px; text-align:center;
+    background:radial-gradient(ellipse at 50% 100%, rgba(28,110,106,0.28), transparent 65%);
+    border-top:1px solid var(--line);
+  }
+  .clocks-eyebrow{letter-spacing:.35em; font-size:11px; text-transform:uppercase; color:var(--gold); font-family:'Helvetica Neue',Arial,sans-serif; margin-bottom:40px;}
+  .clock-row{display:flex; flex-wrap:wrap; gap:28px; justify-content:center; max-width:920px; margin:0 auto;}
+  .clock-card{
+    flex:1 1 380px; border:1px solid var(--line); padding:32px 24px; border-radius:2px;
+    background:linear-gradient(180deg, rgba(201,162,74,0.04), transparent);
+  }
+  .clock-card h3{
+    font-family:'Helvetica Neue',Arial,sans-serif; font-size:11px; letter-spacing:.25em;
+    text-transform:uppercase; color:var(--teal-bright); margin:0 0 20px; font-weight:600;
+  }
+  .clock-digits{display:flex; gap:10px; justify-content:center; flex-wrap:wrap;}
+  .digit-block{min-width:64px;}
+  .digit-num{font-size:clamp(26px,5vw,40px); color:var(--gold-bright); font-variant-numeric:tabular-nums; line-height:1;}
+  .digit-label{font-family:'Helvetica Neue',Arial,sans-serif; font-size:9.5px; letter-spacing:.2em; text-transform:uppercase; color:var(--paper-dim); margin-top:6px;}
+  .clock-note{margin-top:18px; font-size:11.5px; color:var(--paper-dim); font-family:'Helvetica Neue',Arial,sans-serif;}
+
+  footer{text-align:center; padding:30px 20px 50px; color:var(--paper-dim); font-family:'Helvetica Neue',Arial,sans-serif; font-size:11px; letter-spacing:.15em;}
+</style>
+</head>
+<body>
+
+<div id="gate">
+  <div class="gate-crest">⚽</div>
+  <div class="gate-eyebrow">A Personal Archive</div>
+  <h1 class="gate-title">The Final Whistle</h1>
+  <p class="gate-sub">Every post from the 2026 tournament, kept the way it happened — sound included. Tap below to step in.</p>
+  <button id="enterBtn">Enter the Archive</button>
+</div>
+
+<div id="topbar">
+  <div class="brand">World Cup 2026 · Archive</div>
+  <button id="soundBtn" title="Toggle sound">♪</button>
+</div>
+
+<audio id="bgAudio" loop preload="none">
+  <source src="https://raw.githubusercontent.com/InfiniteProfile/FIFA-World-Cup-2026/main/wavin_flag_world_cup.mp3" type="audio/mpeg">
+</audio>
+
+<section class="hero">
+  <div class="hero-eyebrow">Bangladesh · A Fan's Feed</div>
+  <h1>THE ERA<br>THAT ENDED</h1>
+  <p class="lede">Messi's tears, Ronaldo's last run, Spain's sixteen-year wait finally over. Every caption, every photo, kept exactly as it was posted — a record of the month the world stopped for football.</p>
+  <div class="years">2026 — SPAIN CHAMPIONS</div>
+</section>
+
+<main class="feed">
+  <div class="feed-heading">The Feed</div>
+  <div id="postContainer"></div>
+</main>
+
+<section class="clocks">
+  <div class="clocks-eyebrow">Time Between Tournaments</div>
+  <div class="clock-row">
+    <div class="clock-card">
+      <h3>Since the 2026 Final Whistle</h3>
+      <div class="clock-digits" id="clockSince"></div>
+      <div class="clock-note">Counting up from the final in East Rutherford, New Jersey</div>
+    </div>
+    <div class="clock-card">
+      <h3>Until the 2030 Kickoff</h3>
+      <div class="clock-digits" id="clockUntil"></div>
+      <div class="clock-note">Counting down to the centennial tournament — Morocco, Spain &amp; Portugal</div>
+    </div>
+  </div>
+</section>
+
+<footer>INFINITEPROFILE ARCHIVE · WORLD CUP 2026</footer>
+
+<div id="lightbox">
+  <button id="lbClose">&times;</button>
+  <div id="lbContent"></div>
+</div>
+
+<script>
+const RAW = (path) => "https://raw.githubusercontent.com/InfiniteProfile/FIFA-World-Cup-2026/main/" + path;
+const isVideo = (f) => f.toLowerCase().endsWith(".mp4");
+
+// ---- Post data: [ [file paths...], caption ] ----
+const posts = [
+[["file_00000000f28081f8979375a8f5705dc3.png","file_00000000c1f482079252f076100d793c.png","file_00000000b2d48207abb7d941f9ddec7c.png"], ""],
+[["FB_IMG_1784561715021.jpg"], "POSSIBLY THE END OF AN ERA. 🥺💔\n\nLionel Messi, Cristiano Ronaldo and Neymar Jr. may have played their final FIFA World Cup. 🌎👋\n\nThree legends. One unforgettable generation. ✨👑🐐\n\nThank you for the memories. ❤️🫶👏\n\n#FIFAWorldCup #WC2026"],
+[["FB_IMG_1784533615752.jpg"], "The end of an era.\n\n👏👏👏"],
+[["FB_IMG_1784508114670.jpg"], "৩৯ বছর বয়সেও চ্যাম্পিয়ন হওয়ার কতোটুকু খুদা থাকলে সর্বকালের সেরা খেলোয়াড়ও কান্না করে😭 আহ: মেসি খারাপ লাগলো তোমার কান্না চোখ দেখে"],
+[["FB_IMG_1784507926821.jpg"], "Thanks for everything Leo 🥹🐐"],
+[["FB_IMG_1784507747400.jpg"], "The football nation will remember you as a magician..\nYou Finished the world cup with a Great performance ❤️\n8 goals 4 assists⚽🥅"],
+[["FB_IMG_1784507630534.jpg"], "Spain wins the World Cup again after 16 years."],
+[["FB_IMG_1784507496442.jpg"], "CLASS! YAMAL | MESSI #WorldCupFinal"],
+[["file_000000003c8c81fba2fa8930a045e807.png"], ""],
+[["FB_IMG_1784156846910.jpg"], ""],
+[["FB_IMG_1783930438055.jpg"], "Cristiano Ronaldo will return for the 2030 FIFA World Cup, wearing Portugal's shirt one last time alongside his son, Cristiano Ronaldo Jr. ❤️🇵🇹\n\n#ronaldo #cristianoronaldo #sad #worldcup #foryoupage"],
+[["FB_IMG_1783897391935.jpg"], "𝑾𝒐𝒓𝒍𝒅 𝑪𝒖𝒑 𝑳𝒊𝒗𝒆 𝑺𝒄𝒓𝒆𝒆𝒏𝒊𝒏𝒈\n\nThe four best teams in the world. The two biggest rivalries in football. 2 nights. One big screen. 🔥\n\nFrance vs Spain - two European giants, one spot in the final.\nArgentina vs England - 40 years of history, one of the greatest rivalries ever reignited\n\nThe semifinals don't get bigger than this.\n15 July, 1:00 AM | 16 July, 1:00 AM - live at C&B 🏆\n\nThe seats are limited. Inbox us for reservation.\n\n#WorldCupSemiFinals #WorldCup2026 #FranceVsSpain #ArgentinaVsEngland #Messi #LiveScreening #BigScreen #SemiFinals #DhakaCafe #Dhaka #Bangladesh #CrustAndBeans"],
+[["FB_IMG_1783897179409.jpg"], "২০৩০ বিশ্বকাপেও খেলবেন রোনালদো: পর্তুগাল কোচ — ৪১ বছর বয়সে আরেকটি বিশ্বকাপ খেলতে যাচ্ছেন ক্রিস্টিয়ানো রোনালদো। ফিট থাকলে আসন্ন ২০৩০ বিশ্বকাপেও তাকে খেলাতে সমস্যা নেই পর্তুগালের, সম্প্রতি এক সাক্ষাৎকারে এমন..."],
+[["FB_IMG_1783896929806.jpg"], "Norway fails to go past Quarter finals 🇳🇴"],
+[["FB_IMG_1783896847737.jpg"], "🚨 STOP SCROLLING! 👑🐐\n\nIf football had only ONE KING... who would deserve the crown? ⚽🔥\n\nFor millions of fans, there's only one answer:\nCRISTIANO RONALDO. 🇵🇹❤️\nThe mentality. The discipline. The records. The legacy. 🐐👑\n\nAgree or disagree?\n👇 Comment your GOAT.\n\n❤️ Like | 💬 Comment | 📤 Share with every football fan.\n\n#CristianoRonaldo #CR7 #GOAT #Football #Portugal #RonaldoFans #Legend #KingCR7 #footballedits #Soccer #Viral #ExplorePage #FYP #GOATDebate #SIUUUUU"],
+[["FB_IMG_1783896649047.jpg"], "THANK YOU, HAALAND. YOUR WORLD CUP STORY INSPIRED MILLIONS.\n\nEvery great hero's journey eventually reaches its final chapter but that doesn't make the adventure any less legendary. Norway's unforgettable World Cup dream came to an end after a heartbreaking quarterfinal defeat to England, yet Erling Haaland and his teammates achieved something generations of Norwegian fans had never witnessed: a historic run to the last eight of the World Cup. Haaland didn't just score goals he gave football fans hope, passion, and countless unforgettable moments.\n\nThank you, Erling Haaland. The World Cup dream may be over, but your story is far from finished.\n\n#legend #sports #fanpage"],
+[["FB_IMG_1783839321613.jpg"], "They gave a good fight ! 🫡🇳🇴"],
+[["AQNNoQKwnO-H5Kk7xrYQgfN5KuHCrA7m4bDEew8VuKxaNnA7kR1QMYxT9GMT5pDySF0FrZZIb8GjX6muRjNqjgnDAZhgU9W39xT9MxIL1Q.mp4"], "Tonight, V stepped into the crowd, taking in live performances at Vogue World: Hollywood. Known for his own standout fashion moments, he kept it effortlessly stylish in a look worthy of the runway.\n\n#VogueWorld #V #Taehyung #FashionMoment #RunwayStyle\n@leomessi @fifaworldcup"],
+[["FB_IMG_1783756766776.jpg"], "Mbappé tops the World Cup goal-scoring chart—is he threatening Messi's throne? 👑🔥😁 #Mbappe #Messi #WorldCup #Argentina #Spain"],
+[["FB_IMG_1783756609215.jpg"], "SWITZERLAND WILL FACE THE REIGNING WORLD CHAMPIONS ARGENTINA IN THE QUARTERFINALS! WILL THEY BEAT THE UNSTOPPABLE?! 💪🦵🇨🇭🤝🇦🇷🥅🌍⚽🏆😁🤩🥳\n\n#WeAre26 #argentina #Albiceleste #switzerland #Rossocrociati #FIFAWorldCup"],
+[["FB_IMG_1783756409302.jpg"], "এখন এই একজন গেলেই সমস্ত সমালোচনা বন্ধ 💔⚽️\nবাকি রইল 1🪄"],
+[["AQPmBS9XFtes8NCnYJFoK0wK9tytJUIn8L2wv9ENprWdolI74s0CR1G6cwWhhmwMa4p-yriqrIydAAUKjsiGvhLUrtkLr2MgoEWomh3anA.mp4"], "This FIFAtanic love story is so beautiful to watch.. 🥹😍\n\n#WorldCup2026 #fifa #messi #argentina #fyp"],
+[["FB_IMG_1783709310093.jpg"], "নেইমার কাঁদছে। এটাই হয়তো ব্রাজিলের জার্সিতে তার শেষ ম্যাচ ছিল।💔\n\nব্রাজিল তাকে মাত্র শেষ 20 মিনিট খেলিয়েছে, আর সেই সময়েই সে একটি গোলও করেছে। যদি তাকে পুরো ম্যাচ খেলানো হতো, তাহলে ফল ভিন্নও হতে পারত।\n\nগিমারায়েস যে পেনাল্টিটি মিস করেছে, নেইমার সম্ভবত সেটি মিস করত না।"],
+[["FB_IMG_1783671443810.jpg","FB_IMG_1783671445870.jpg"], "اپنے ہیروز کی قدر کیسے کی جاتی ہے یہ مصری لوگوں نےبتادیا مصر کی فٹبال ٹیم ورلڈ کپ میں شاندار پرفارمنس اور ارجنٹائن کے خلاف امپائر کی وجہ سے شکست پر جب ٹیم مصر کے دارالحکومت قاہرہ پہنچی تو ائرپورٹ سے ٹیم کو جلوس کی شکل میں راونہ کیا گیا۔ کھلاڑیوں کو چاندی کے ہار پہنائے گئے اور کوچ حسام حسن کو مصر کے سب سے بڑے اعزاز کے لیے نامزد کیا گیا۔\n\n#FIFAWorldCup #suggestedforyou #syedghafarshah"],
+[["FB_IMG_1783671327932.jpg"], "EVERYONE SEEMS HATING TO SEE ARGENTINA PROGRESS TO THE FIFA World Cup FINAL ONCE AGAIN! 😠😡🤬⚽🌍🥅🏆🇦🇷💪🦵😎🥳🤩😁\n\n#WeAre26 #argentina #Albiceleste #QuarterFinals #FIFAWorldCup"],
+[["FB_IMG_1783671216689.jpg"], "Global Gravity\n\n\"I became a fan of the legend Cristiano Ronaldo.\" — The recurring admission from icons worldwide.\n\nWhen you reach a certain level of fame, your audience stops being just football fans and starts including the absolute elite of culture, entertainment, and other sports disciplines. From Hollywood actors to Olympic champions, the world is drawn to Cristiano Ronaldo because his brand represents an unshakeable standard of work ethic, physical perfection, and psychological dominance.\n\nAn impact that ignores borders and sports.\nThe ultimate benchmark for human discipline.\nGreat players entertain; icons alter the culture."],
+[["FB_IMG_1783671053392.jpg"], "🐐🇵🇹 CRISTIANO RONALDO HAS EARNED THE RESPECT OF THE ENTIRE WORLD. HE DOESN'T NEED A WORLD CUP TO BE CONSIDERED THE GOAT.\n\n👀 NO ONE IS ADMIRED AS MUCH AS HE IS FOR THE SACRIFICE AND DAILY EFFORT HE HAS PUT IN OVER A 20-YEAR CAREER.\n\nNOTHING WAS EVER HANDED TO HIM. HE HAS HAD TO FIGHT AGAINST EVERYONE. AND YET, HERE HE STILL IS.\n\nTHANK YOU, CRISTIANO. ❤️\n\n#cristianoronaldo #worldcup #realmadrid #mbappe #cr7"],
+[["FB_IMG_1783670865395.jpg"], "২০০৬ থেকে ২০২৬—প্রতিটি বিশ্বকাপে চোখের জল, তবুও ভালোবাসা একটুও কমেনি বস CR7 ❤️🇵🇹🐐"],
+[["FB_IMG_1783625841549.jpg"], "The Fate of World Cup Stars... Between Brilliance and Collapse! 🔥👑😁\n\n#Messi #CristianoRonaldo #Vinicius #WorldCup"],
+[["FB_IMG_1783595158749.jpg"], "Greatest of All Time নির্ধারণে কে কয়টা বিশ্বকাপ জিতলো- এই সমীকরণটা আমার কাছে ব্যক্তিগতভাবে একটু অবিচার বলে মনে হয়। বিশ্বকাপ জেতা আর না জেতা এটা দলীয় ব্যাপার। পর্তুগাল কি কখনও বিশ্বকাপ জেতার মত টিম ছিল?\n\nফুটবলের ইতিহাসের অল টাইম টপ স্কোরারকে নিয়ে যারা ট্রল করে, তারা হয় পাগল, নাহয় তাদের স্মৃতিশক্তি দুর্বল।"],
+[["FB_IMG_1783594359589.jpg"], ""],
+[["FB_IMG_1783594380936.jpg"], "🐐 CRISTIANO RONALDO IS THE BEST PLAYER IN HISTORY.\n\nTHIS IS THE RANKING OF THE BEST PLAYERS IN THE HISTORY OF FOOTBALL.\n🥈 MESSI IS IN SECOND PLACE, AND MARADONA IS IN THIRD. OTHERS, SUCH AS NEYMAR, VAN BASTEN, AND FERENC PUSKÁS, MISS THE CUT.\n\nWHO IS MISSING FROM THIS RANKING?\n\n#cristianoronaldo #worldcup #messi #realmadrid #goat"],
+[["FB_IMG_1783593345877.jpg"], "The whole world believes on you Switzerland do it for football\n\nBefore saying only portizil fans want them to lose you should check twitter and Reddit too\n\n#anime #football #meme"],
+[["FB_IMG_1783579822575.jpg"], "World Cup heartbreak for Ronaldo 💔"],
+[["AQM1K_h8egLLSMqXVgNZiNEVxXu7oAkrrFhWyZvRwAlJl97wHmGNTZkMBHcrjcGL_FX9sDJN8uF1Wa4wmvNJq85ZJUccn9uVXx1CKLUfiw.mp4"], ""],
+[["FB_IMG_1783546721162.jpg"], "The Historic Final Chapter\n\nSix World Cups. Over two decades of absolute dominance. Cristiano Ronaldo has officially completed his final tournament run on the grandest stage in sports.\n\nThe dream of lifting the trophy came to a heartbreaking halt against Spain in the Round of 16, but the achievement of simply stepping onto the pitch at this tournament defies the laws of modern football biology.\n\nThe final tournament is over. The records stand completely secure. A historic legacy that will be remembered for generations."],
+[["FB_IMG_1783546637915.jpg"], "absolute cinema\n\n#oc #WofBD #military_police"],
+[["FB_IMG_1783546491339.jpg"], "🚨 BREAKING: The Argentine Football Association (AFA) is reportedly under investigation by the FBI over its financial operations in the United States. 🇦🇷🇺🇸\n\nReports claim the probe is examining alleged money laundering and the movement of millions of dollars through the U.S. financial system.\n\nA major off-field challenge could be unfolding for the world champions.\n\n#Argentina #FBI #FootballNews #Breaking #LionelMessi"],
+[["FB_IMG_1783546345798.jpg"], "হ্যাঁ এটা তাদের বাপ দাদার সম্পদ কয় পিস থ্রি পিস তারপরে ফোর পিস হবে 😁\n\n#championsleague #argentina #Congratulations #fypシ゚ #fbreels"],
+[["FB_IMG_1783546237409.jpg"], "Liverpool star Mohamed Salah has once again voiced his support for the people of Palestine, saying his heart is broken by the ongoing humanitarian crisis. Emphasizing that every human life is sacred, Salah called for compassion and peace amid the conflict.\n\nDisclaimer: This content is shared for awareness, public information, and journalistic purposes only. This information is based on publicly available reports. The image is AI generated and is just for reference.\n\n#MohamedSalah #Peace #Palestine"],
+[["FB_IMG_1783546043517.jpg","FB_IMG_1783546041634.jpg","FB_IMG_1783546039439.jpg"], "Goodbye Egyptian Legend💔🥺\nMohamed Salah 😪❤️🥰🫂"],
+[["FB_IMG_1783545927249.jpg"], "🚨 Cristiano Ronaldo could reunite with Al-Nassr manager Jorge Jesus for Euro 2028!? 🇵🇹👀\n\nCurrent Portugal manager Roberto Martínez has confirmed his departure following Portugal's World Cup exit against Spain. 👔❌\n\nAccording to A Bola, Al-Nassr manager Jorge Jesus is set to succeed him and take charge of Portugal for the Euro 2028 and 2030 World Cup cycle. ⏳✅\n\nShould Ronaldo feature at Euro 2028, it would be his seventh European Championship. 🤯😅"],
+[["FB_IMG_1783545743874.jpg"], ""],
+[["FB_IMG_1783543728325.jpg"], "Luka Modric has now all ended his World Cup career without ever lifting the trophy. 💔🥺"],
+[["FB_IMG_1783539844916.jpg"], "সময় বদলায়, প্রজন্ম বদলায়, কিংবদন্তিরাও একদিন মাঠ ছাড়ে\nকিন্তু কিছু নাম হৃদয় থেকে কখনো মুছে যায় না।\n\nতুমি শিখিয়েছো, স্বপ্ন দেখতে হলে বড় করে দেখতে হয়।\nপড়ে গেলেও আবার উঠে দাঁড়াতে হয়।\n\nআমি তোমাকে কোনোদিন ভুলব না, ক্রিস্টিয়ানো রোনালদো।\nআমার কাছে তুমি চিরকালই GOAT 👑🐐\n\nRonaldo 😌🧿♥️"],
+[["FB_IMG_1783539706442.jpg"], "এই গোলকিপার কে নিয়ে একটা লাইন লিখুন।"],
+[["FB_IMG_1783539583379.jpg"], "ভবের চাটন boss"],
+[["FB_IMG_1783539424328.jpg"], "পর্তুজিল 👺🥀\n\n#ANS_বাংলা"],
+[["FB_IMG_1783534170945.jpg"], "🚨 𝗡𝗘𝗪: Chicharito put a like on this IG post.\n\nTHE WORLD IS WATCHING! 👀👌"],
+[["FB_IMG_1783533072387.jpg"], "Egypt vs. Argentina in the World Cup? 🔥😰\n\n#Messi #Argentina #Egypt #WorldCup"],
+[["FB_IMG_1783532971339.jpg"], "The End...💛❤️"],
+[["FB_IMG_1783532599686.jpg"], "شكرًا ليكم على ٢٣ يوم من أحلى اللحظات اللي عشناها سوى 🤩🇪🇬\nThank you for 23 days of the best moments we could have shared together 🤩🇪🇬\n\n#شجع_مصر #منتخب_الفراعنة #الفراعنة_في_كأس_العالم #egyptnt #FIFAWORLDCUP"],
+[["FB_IMG_1783532493477.jpg"], "Man of the match-well played!\n\n#artsbyrats #argentina #egypt #FIFAWorldCup"],
+[["FB_IMG_1783532230643.jpg"], "Some trophies were lifted. 🏆\nOne dream remained out of reach... 🌍🏆\n\nBut legends are not defined by a single trophy. They are remembered for the millions they inspired. ❤️🐐\n\nThank you, Cristiano Ronaldo, for every goal, every comeback, every unforgettable moment. 🇵🇹\n\nObrigado, CR7. ❤️🐐 #ThankYouRonaldo #CR7 #GOAT #ForeverLegend"],
+[["FB_IMG_1783531892815.jpg"], "এটাই হলো আসল কাহিনি\n\nমেসি ফিফা প্রেসিডেন্ট কে গোয়া মারা দেওয়ার জন্য ধন্যবাদ তাই তো বলি এতো ফ্রি কিক পেনাল্টি পায় কেমনে এই গোয়া মারা দেওয়ার জন্য মেসি কাজ টা ঠিক করলা 😁"]
+];
+
+// ---------- Render posts ----------
+const container = document.getElementById('postContainer');
+
+function escapeHTML(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function renderCaption(text){
+  if(!text) return "";
+  const escaped = escapeHTML(text);
+  return `<span class="bracket">(</span>${escaped}<span class="bracket">)</span>`;
+}
+
+posts.forEach((p, i) => {
+  const [files, caption] = p;
+  const article = document.createElement('article');
+  article.className = 'post';
+  article.setAttribute('data-index', String(i+1).padStart(2,'0') + ' / ' + String(posts.length).padStart(2,'0'));
+
+  let mediaHTML = '';
+  if(files.length === 1){
+    mediaHTML = `<div class="post-media"><div class="lazy-ph" data-src="${RAW(files[0])}" data-video="${isVideo(files[0])}"></div></div>`;
+  } else {
+    const gridClass = files.length === 3 ? 'g3' : 'g2';
+    mediaHTML = `<div class="media-grid ${gridClass}">` +
+      files.map(f => `<div class="lazy-ph" data-src="${RAW(f)}" data-video="${isVideo(f)}" style="aspect-ratio:1/1;"></div>`).join('') +
+      `</div>`;
+  }
+
+  article.innerHTML = mediaHTML + `<div class="post-caption">${renderCaption(caption)}</div>
+    <div class="post-foot"><span class="crest">⚽ InfiniteProfile</span><span>World Cup 2026</span></div>`;
+  container.appendChild(article);
+});
+
+// ---------- Lazy load via IntersectionObserver ----------
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if(entry.isIntersecting){
+      const el = entry.target;
+      const src = el.getAttribute('data-src');
+      const isVid = el.getAttribute('data-video') === 'true';
+      let node;
+      if(isVid){
+        node = document.createElement('video');
+        node.src = src; node.muted = true; node.playsInline = true; node.loop = true; node.autoplay = true; node.controls = false;
+      } else {
+        node = document.createElement('img');
+        node.src = src; node.loading = 'lazy';
+      }
+      node.addEventListener('click', () => openLightbox(src, isVid));
+      el.replaceWith(node);
+      io.unobserve(el);
+    }
+  });
+}, {rootMargin: '250px 0px'});
+
+document.querySelectorAll('.lazy-ph').forEach(el => io.observe(el));
+
+// ---------- Lightbox ----------
+const lightbox = document.getElementById('lightbox');
+const lbContent = document.getElementById('lbContent');
+function openLightbox(src, isVid){
+  lbContent.innerHTML = isVid
+    ? `<video src="${src}" controls autoplay playsinline></video>`
+    : `<img src="${src}">`;
+  lightbox.classList.add('open');
+}
+document.getElementById('lbClose').addEventListener('click', closeLightbox);
+lightbox.addEventListener('click', (e) => { if(e.target === lightbox) closeLightbox(); });
+document.addEventListener('keydown', (e) => { if(e.key === 'Escape') closeLightbox(); });
+function closeLightbox(){
+  lightbox.classList.remove('open');
+  lbContent.innerHTML = '';
+}
+
+// ---------- Gate + audio ----------
+const gate = document.getElementById('gate');
+const audio = document.getElementById('bgAudio');
+const soundBtn = document.getElementById('soundBtn');
+let soundOn = true;
+
+document.getElementById('enterBtn').addEventListener('click', () => {
+  gate.classList.add('hidden');
+  audio.volume = 0.55;
+  audio.play().catch(()=>{ soundOn = false; soundBtn.textContent = '✕'; });
+});
+
+soundBtn.addEventListener('click', () => {
+  soundOn = !soundOn;
+  if(soundOn){ audio.play().catch(()=>{}); soundBtn.textContent = '♪'; }
+  else { audio.pause(); soundBtn.textContent = '✕'; }
+});
+
+// ---------- Stopwatches ----------
+const FINAL_2026 = new Date("2026-07-19T20:00:00Z").getTime();
+const KICKOFF_2030 = new Date("2030-06-08T18:00:00Z").getTime();
+
+function renderClock(containerId, ms){
+  const s = Math.floor(ms/1000);
+  const days = Math.floor(s/86400);
+  const hours = Math.floor((s%86400)/3600);
+  const mins = Math.floor((s%3600)/60);
+  const secs = s%60;
+  const el = document.getElementById(containerId);
+  const units = [[days,'Days'],[hours,'Hrs'],[mins,'Min'],[secs,'Sec']];
+  el.innerHTML = units.map(([v,l]) => `<div class="digit-block"><div class="digit-num">${String(v).padStart(2,'0')}</div><div class="digit-label">${l}</div></div>`).join('');
+}
+
+function tick(){
+  const now = Date.now();
+  renderClock('clockSince', Math.max(0, now - FINAL_2026));
+  renderClock('clockUntil', Math.max(0, KICKOFF_2030 - now));
+}
+tick();
+setInterval(tick, 1000);
+</script>
+</body>
+</html>
